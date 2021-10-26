@@ -1,5 +1,5 @@
 import Visualizer from "./lib/visualizer.js";
-import glossary from "./lib/glossary.js";
+import glossary from "../data/glossary.js";
 
 const whitepaperVisualizer = new Visualizer('../data/whitepaper.jsonl');
 const academicVisualizer = new Visualizer('../data/academic.jsonl');

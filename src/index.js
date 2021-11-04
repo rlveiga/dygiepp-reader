@@ -1,16 +1,21 @@
 import Visualizer from "./lib/visualizer.js";
-import glossary from "../data/glossary.js";
+import glossary from "./lib/glossary.js";
 
-const whitepaperVisualizer = new Visualizer('../data/whitepaper.jsonl');
-const academicVisualizer = new Visualizer('../data/academic.jsonl');
+const whitepaperVisualizer = new Visualizer('./data/whitepaper.jsonl');
+const academicVisualizer = new Visualizer('./data/academic.jsonl');
+const wikiVisualizer = new Visualizer('./data/wiki.jsonl');
 
 whitepaperVisualizer.initializeEntityDict();
 academicVisualizer.initializeEntityDict();
+wikiVisualizer.initializeEntityDict();
 
 const whitepaperFrequencyList = whitepaperVisualizer.getFrequencyList();
 const academicFrequencyList = academicVisualizer.getFrequencyList();
+const wikiFrequencyList = wikiVisualizer.getFrequencyList();
 
-console.log(whitepaperVisualizer.entityDict)
+console.log(whitepaperVisualizer.getDocumentInfo('whitepaper_bitcoin'));
+// console.log(wikiFrequencyList);
+
 // let countMap = {};
 
 // whitepaperFrequencyList.forEach(item => {

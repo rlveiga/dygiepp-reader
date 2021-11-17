@@ -1,5 +1,6 @@
 import { getJSON } from "../scripts/get-json.js";
 import fs from 'fs';
+import glossary from "./glossary.js";
 
 export default class Visualizer {
   constructor(filePath) {
@@ -7,7 +8,10 @@ export default class Visualizer {
     this.lines = fs.readFileSync(filePath).toString().split('\n');
   }
 
-  initializeEntity(word, entity) {
+  // PRIVATE METHODS
+
+  // Initialize entity inside entity dictionary
+  #initializeEntity(word, entity) {
     this.entityDict[word] = {
       relations: [],
       sentences: []
@@ -18,12 +22,69 @@ export default class Visualizer {
     }
   }
 
+  // Returns list of entities for a sentence
+  #getPredictedNER(document, sentence, sentenceIndex) {
+    const previousTokens = document["sentences"].slice(0, sentenceIndex).flat().length;
+
+    return document["predicted_ner"][sentenceIndex].map((item) => {
+      const startIndex = item[0] - previousTokens;
+      const endIndex = item[1] - previousTokens;
+      const entityType = item[2];
+
+      return [sentence.slice(startIndex, endIndex + 1), entityType];
+    });
+  }
+
+  // Returns list of relations for a sentence
+  #getPredictedRelations(document, sentence, sentenceIndex) {
+    const previousTokens = document["sentences"].slice(0, sentenceIndex).flat().length;
+
+    return document["predicted_relations"][sentenceIndex].map((item) => {
+      const startIndexLeft = item[0] - previousTokens;
+      const endIndexLeft = item[1] - previousTokens;
+      const startIndexRight = item[2] - previousTokens;
+      const endIndexRight = item[3] - previousTokens;
+
+      const relationType = item[4];
+
+      return [
+        sentence.slice(startIndexLeft, endIndexLeft + 1),
+        sentence.slice(startIndexRight, endIndexRight + 1),
+        relationType
+      ];
+    });
+  }
+
+  // Get all entities for a document
+  #getEntities(docKey) {
+    const document = getJSON(this.lines, docKey);
+
+    return document["sentences"].map((sentence, index) => {
+      const predictedEntities = this.#getPredictedNER(document, sentence, index);
+
+      return predictedEntities;
+    });
+  }
+
+  // Get all relations for a document
+  #getRelations(docKey) {
+    const document = getJSON(this.lines, docKey);
+
+    return document["sentences"].map((sentence, index) => {
+      const predictedRelations = this.#getPredictedRelations(document, sentence, index);
+
+      return predictedRelations;
+    });
+  }
+
+  // PUBLIC METHODS
+
   initializeEntityDict() {
     this.lines.forEach((item) => {
       item = JSON.parse(item);
 
-      const entities = this.getEntities(item['doc_key']);
-      const relations = this.getRelations(item['doc_key']);
+      const entities = this.#getEntities(item['doc_key']);
+      const relations = this.#getRelations(item['doc_key']);
       const sentences = item['sentences'];
 
       entities.forEach((e, sentenceIndex) => {
@@ -37,7 +98,7 @@ export default class Visualizer {
 
           // word not found in entityDict, initialize it
           if (!this.entityDict[word]) {
-            this.initializeEntity(word, entity);
+            this.#initializeEntity(word, entity);
           }
 
           else {
@@ -98,56 +159,27 @@ export default class Visualizer {
     return sortedList;
   }
 
-  // Returns list of entities for a sentence
-  getPredictedNER(document, sentence, sentenceIndex) {
-    const previousTokens = document["sentences"].slice(0, sentenceIndex).flat().length;
+  getGlossaryEntities() {
+    let countMap = {};
+    let frequencyList = this.getFrequencyList();
 
-    return document["predicted_ner"][sentenceIndex].map((item) => {
-      const startIndex = item[0] - previousTokens;
-      const endIndex = item[1] - previousTokens;
-      const entityType = item[2];
-
-      return [sentence.slice(startIndex, endIndex + 1), entityType];
+    frequencyList.forEach(item => {
+      glossary.forEach(word => {
+        if (
+          item[0].includes(word.toLowerCase())
+        ) {
+          if(!countMap[word]) {
+            countMap[word] = 1;
+          }
+          
+          else {
+            countMap[word]++;
+          }
+        }
+      })
     });
-  }
 
-  getPredictedRelations(document, sentence, sentenceIndex) {
-    const previousTokens = document["sentences"].slice(0, sentenceIndex).flat().length;
-
-    return document["predicted_relations"][sentenceIndex].map((item) => {
-      const startIndexLeft = item[0] - previousTokens;
-      const endIndexLeft = item[1] - previousTokens;
-      const startIndexRight = item[2] - previousTokens;
-      const endIndexRight = item[3] - previousTokens;
-
-      const relationType = item[4];
-
-      return [
-        sentence.slice(startIndexLeft, endIndexLeft + 1),
-        sentence.slice(startIndexRight, endIndexRight + 1),
-        relationType
-      ];
-    });
-  }
-
-  getEntities(docKey) {
-    const document = getJSON(this.lines, docKey);
-
-    return document["sentences"].map((sentence, index) => {
-      const predictedEntities = this.getPredictedNER(document, sentence, index);
-
-      return predictedEntities;
-    });
-  }
-
-  getRelations(docKey) {
-    const document = getJSON(this.lines, docKey);
-
-    return document["sentences"].map((sentence, index) => {
-      const predictedRelations = this.getPredictedRelations(document, sentence, index);
-
-      return predictedRelations;
-    });
+    return countMap;
   }
 
   getNumberOfSentences() {
@@ -162,8 +194,8 @@ export default class Visualizer {
   }
 
   getDocumentInfo(docKey) {
-    const entities = this.getEntities(docKey);
-    const relations = this.getRelations(docKey);
+    const entities = this.#getEntities(docKey);
+    const relations = this.#getRelations(docKey);
 
     console.log("ENTITIES:");
     entities.forEach((e, i) => {

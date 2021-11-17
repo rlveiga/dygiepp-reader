@@ -198,14 +198,14 @@ export default class Visualizer {
       let matchedAlias = word;
 
       if (this.entityDict[word]) {
-        console.log("Found direct match");
+        console.log(`Found direct match for ${word}`);
         isEntity = true;
       }
 
       else {
         aliasList.forEach(alias => {
           if (this.entityDict[alias]) {
-            console.log("Found match trough alias");
+            console.log(`Found match for ${word} trough alias ${alias}`);
             isEntity = true;
             matchedAlias = alias;
             return;

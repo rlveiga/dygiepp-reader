@@ -1,6 +1,7 @@
 import { getJSON } from "../scripts/get-json.js";
 import fs from 'fs';
 import glossary from "./glossary.js";
+import aliases from "./aliases.js";
 
 export default class Visualizer {
   constructor(filePath) {
@@ -159,24 +160,72 @@ export default class Visualizer {
     return sortedList;
   }
 
-  getGlossaryEntities() {
+  getGlossaryEntitiesWithoutAlias() {
     let countMap = {};
-    let frequencyList = this.getFrequencyList();
 
-    frequencyList.forEach(item => {
-      glossary.forEach(word => {
-        if (
-          item[0].includes(word.toLowerCase())
-        ) {
-          if(!countMap[word]) {
-            countMap[word] = 1;
+    glossary.forEach(word => {
+      let isEntity = false;
+
+      if (this.entityDict[word]) {
+        console.log("Found direct match");
+        isEntity = true;
+      }
+
+      if (
+        isEntity
+      ) { // found glossary term as an entity
+        countMap[word] = 0;
+
+        for (const key in this.entityDict[word]) {
+          if (key == 'relations' || key == 'sentences') {
+            continue;
           }
-          
-          else {
-            countMap[word]++;
-          }
+
+          countMap[word] += this.entityDict[word][key].count;
         }
-      })
+      }
+    });
+
+    return countMap;
+  }
+
+  getGlossaryEntitiesWithAlias() {
+    let countMap = {};
+
+    glossary.forEach(word => {
+      let aliasList = aliases[word] || [];
+      let isEntity = false;
+      let matchedAlias = word;
+
+      if (this.entityDict[word]) {
+        console.log("Found direct match");
+        isEntity = true;
+      }
+
+      else {
+        aliasList.forEach(alias => {
+          if (this.entityDict[alias]) {
+            console.log("Found match trough alias");
+            isEntity = true;
+            matchedAlias = alias;
+            return;
+          }
+        })
+      }
+
+      if (
+        isEntity
+      ) { // found glossary term as an entity
+        countMap[word] = 0;
+
+        for (const key in this.entityDict[matchedAlias]) {
+          if (key == 'relations' || key == 'sentences') {
+            continue;
+          }
+
+          countMap[word] += this.entityDict[matchedAlias][key].count;
+        }
+      }
     });
 
     return countMap;

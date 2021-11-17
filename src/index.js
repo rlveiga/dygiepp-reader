@@ -9,9 +9,5 @@ whitepaperVisualizer.initializeEntityDict();
 academicVisualizer.initializeEntityDict();
 wikiVisualizer.initializeEntityDict();
 
-const whitepaperFrequencyList = whitepaperVisualizer.getFrequencyList();
-const academicFrequencyList = academicVisualizer.getFrequencyList();
-const wikiFrequencyList = wikiVisualizer.getFrequencyList();
-
 let glossaryEntities = whitepaperVisualizer.getGlossaryEntitiesWithAlias();
 console.log(`Detected ${Object.keys(glossaryEntities).length} out of ${glossary.length} terms as entities on whitepaper corpus (${(Object.keys(glossaryEntities).length / glossary.length).toFixed(2) * 100}%)`)

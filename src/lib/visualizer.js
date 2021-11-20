@@ -78,6 +78,23 @@ export default class Visualizer {
     });
   }
 
+  #getGlossaryTerm(word) {
+    let matchedWord;
+
+    glossary.forEach(glossaryWord => {
+      let aliasList = aliases[glossaryWord] || [];
+
+      aliasList.forEach(alias => {
+        if (alias == word) {
+          matchedWord = glossaryWord;
+          return;
+        }
+      });
+    });
+
+    return matchedWord
+  }
+
   // PUBLIC METHODS
 
   initializeEntityDict() {
@@ -95,6 +112,13 @@ export default class Visualizer {
 
           if (word == ' ' || word == '-') {
             return;
+          }
+
+          // check if this word can be represented by a glossary term
+          let matchedGlossaryWord = this.#getGlossaryTerm(word);
+
+          if (matchedGlossaryWord) {
+            word = matchedGlossaryWord;
           }
 
           // word not found in entityDict, initialize it
@@ -123,8 +147,21 @@ export default class Visualizer {
         r.forEach(data => {
           let wordIn, wordOut;
 
-          wordIn = data[0].join(" ");
-          wordOut = data[1].join(" ");
+          wordIn = data[0].join(" ").toLowerCase();
+          wordOut = data[1].join(" ").toLowerCase();
+
+          // check if this words can be represented by a glossary term
+          let matchedGlossaryWord = this.#getGlossaryTerm(wordIn);
+
+          if (matchedGlossaryWord) {
+            wordIn = matchedGlossaryWord;
+          }
+
+          matchedGlossaryWord = this.#getGlossaryTerm(wordOut);
+
+          if (matchedGlossaryWord) {
+            wordOut = matchedGlossaryWord;
+          }
 
           if (this.entityDict[wordIn]) {
             this.entityDict[wordIn].relations.push(data);

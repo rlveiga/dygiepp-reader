@@ -150,6 +150,10 @@ export default class Visualizer {
           wordIn = data[0].join(" ").toLowerCase();
           wordOut = data[1].join(" ").toLowerCase();
 
+          if (wordIn == ' ' || wordOut == ' ') {
+            return;
+          }
+
           // check if this words can be represented by a glossary term
           let matchedGlossaryWord = this.#getGlossaryTerm(wordIn);
 
@@ -204,7 +208,6 @@ export default class Visualizer {
       let isEntity = false;
 
       if (this.entityDict[word]) {
-        console.log("Found direct match");
         isEntity = true;
       }
 
@@ -235,7 +238,6 @@ export default class Visualizer {
       let matchedAlias = word;
 
       if (this.entityDict[word]) {
-        console.log(`Found direct match for ${word}`);
         isEntity = true;
       }
 

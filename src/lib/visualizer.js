@@ -97,7 +97,7 @@ export default class Visualizer {
 
   // PUBLIC METHODS
 
-  initializeEntityDict() {
+  initializeEntityDict(useAliases = true) {
     this.lines.forEach((item) => {
       item = JSON.parse(item);
 
@@ -114,11 +114,13 @@ export default class Visualizer {
             return;
           }
 
-          // check if this word can be represented by a glossary term
-          let matchedGlossaryWord = this.#getGlossaryTerm(word);
+          if (useAliases) {
+            // check if this word can be represented by a glossary term
+            let matchedGlossaryWord = this.#getGlossaryTerm(word);
 
-          if (matchedGlossaryWord) {
-            word = matchedGlossaryWord;
+            if (matchedGlossaryWord) {
+              word = matchedGlossaryWord;
+            }
           }
 
           // word not found in entityDict, initialize it
@@ -154,17 +156,19 @@ export default class Visualizer {
             return;
           }
 
-          // check if this words can be represented by a glossary term
-          let matchedGlossaryWord = this.#getGlossaryTerm(wordIn);
+          if (useAliases) {
+            // check if this words can be represented by a glossary term
+            let matchedGlossaryWord = this.#getGlossaryTerm(wordIn);
 
-          if (matchedGlossaryWord) {
-            wordIn = matchedGlossaryWord;
-          }
+            if (matchedGlossaryWord) {
+              wordIn = matchedGlossaryWord;
+            }
 
-          matchedGlossaryWord = this.#getGlossaryTerm(wordOut);
+            matchedGlossaryWord = this.#getGlossaryTerm(wordOut);
 
-          if (matchedGlossaryWord) {
-            wordOut = matchedGlossaryWord;
+            if (matchedGlossaryWord) {
+              wordOut = matchedGlossaryWord;
+            }
           }
 
           if (this.entityDict[wordIn]) {
@@ -201,7 +205,7 @@ export default class Visualizer {
     return sortedList;
   }
 
-  getGlossaryEntitiesWithoutAlias() {
+  getGlossaryEntities() {
     let countMap = {};
 
     glossary.forEach(word => {
@@ -222,47 +226,6 @@ export default class Visualizer {
           }
 
           countMap[word] += this.entityDict[word][key].count;
-        }
-      }
-    });
-
-    return countMap;
-  }
-
-  getGlossaryEntitiesWithAlias() {
-    let countMap = {};
-
-    glossary.forEach(word => {
-      let aliasList = aliases[word] || [];
-      let isEntity = false;
-      let matchedAlias = word;
-
-      if (this.entityDict[word]) {
-        isEntity = true;
-      }
-
-      else {
-        aliasList.forEach(alias => {
-          if (this.entityDict[alias]) {
-            console.log(`Found match for ${word} trough alias ${alias}`);
-            isEntity = true;
-            matchedAlias = alias;
-            return;
-          }
-        })
-      }
-
-      if (
-        isEntity
-      ) { // found glossary term as an entity
-        countMap[word] = 0;
-
-        for (const key in this.entityDict[matchedAlias]) {
-          if (key == 'relations' || key == 'sentences') {
-            continue;
-          }
-
-          countMap[word] += this.entityDict[matchedAlias][key].count;
         }
       }
     });

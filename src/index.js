@@ -1,22 +1,19 @@
 import Visualizer from "./lib/visualizer.js";
-import glossary from "./lib/glossary.js";
 
-const whitepaperVisualizer = new Visualizer('./data/scierc/whitepaper.jsonl');
-const academicVisualizer = new Visualizer('./data/scierc/academic.jsonl');
-const wikiVisualizer = new Visualizer('./data/scierc/wiki.jsonl');
+const args = process.argv;
+const model = args[2];
 
-const whitepaperVisualizerLightweight = new Visualizer('./data/scierc_lightweight/whitepaper.jsonl');
-const academicVisualizerLightweight = new Visualizer('./data/scierc_lightweight/academic.jsonl');
-const wikiVisualizerLightweight = new Visualizer('./data/scierc_lightweight/wiki.jsonl');
+if(!model) {
+    console.error('Please provide a model (yarn start <model name>)');
+    process.exit();
+}
 
-whitepaperVisualizer.initializeEntityDict();
+const whitepaperVisualizer = new Visualizer(`./data/${model}/whitepaper.jsonl`);
+const academicVisualizer = new Visualizer(`./data/${model}/academic.jsonl`);
+const wikiVisualizer = new Visualizer(`./data/${model}/wiki.jsonl`);
+
+whitepaperVisualizer.initializeEntityDict(false);
 academicVisualizer.initializeEntityDict();
 wikiVisualizer.initializeEntityDict();
 
-whitepaperVisualizerLightweight.initializeEntityDict();
-academicVisualizerLightweight.initializeEntityDict();
-wikiVisualizerLightweight.initializeEntityDict();
-
-console.log(academicVisualizer.entityDict['next - generation cryptocurrencies'].relations)
-// console.log('\n')
-// console.log(academicVisualizerLightweight.entityDict['smart-contract'].relations)
+console.log(whitepaperVisualizer.getGlossaryEntities())

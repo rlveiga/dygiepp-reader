@@ -1,5 +1,4 @@
 const glossary = [
-  "aggregator",
   "automatic market maker",
   "asset management",
   "atomic swap",
@@ -14,6 +13,7 @@ const glossary = [
   "erc20",
   "ethereum",
   "farming",
+  "farming aggregator",
   "governance",
   "insurance",
   "inter-blockchain",
@@ -21,6 +21,7 @@ const glossary = [
   "invoice",
   "layer-2",
   "lending",
+  "liquidity aggregator",
   "liquidity pool",
   "liquidity provider",
   "liquidity protocol",

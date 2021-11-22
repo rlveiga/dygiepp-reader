@@ -1,73 +1,95 @@
 import Visualizer from "../lib/visualizer.js";
 import glossary from "../lib/glossary.js";
 
-const whitepaperVisualizer = new Visualizer('./data/scierc/whitepaper.jsonl');
-const academicVisualizer = new Visualizer('./data/scierc/academic.jsonl');
-const wikiVisualizer = new Visualizer('./data/scierc/wiki.jsonl');
+const args = process.argv;
+const model = args[2];
+const useAliases = args[3] == 'false' ? false : true;
 
-const whitepaperVisualizerLightweight = new Visualizer('./data/scierc_lightweight/whitepaper.jsonl');
-const academicVisualizerLightweight = new Visualizer('./data/scierc_lightweight/academic.jsonl');
-const wikiVisualizerLightweight = new Visualizer('./data/scierc_lightweight/wiki.jsonl');
+if (!model) {
+  console.error('Please provide a model (yarn start <model name>)');
+  process.exit();
+}
 
-whitepaperVisualizer.initializeEntityDict();
-academicVisualizer.initializeEntityDict();
-wikiVisualizer.initializeEntityDict();
+console.log(`Running analysis ${useAliases ? 'with' : 'without'} the use of aliases...`)
 
-whitepaperVisualizerLightweight.initializeEntityDict();
-academicVisualizerLightweight.initializeEntityDict();
-wikiVisualizerLightweight.initializeEntityDict();
+const whitepaperVisualizer = new Visualizer(`./data/${model}/whitepaper.jsonl`);
+const academicVisualizer = new Visualizer(`./data/${model}/academic.jsonl`);
+const wikiVisualizer = new Visualizer(`./data/${model}/wiki.jsonl`);
+
+whitepaperVisualizer.initializeEntityDict(useAliases);
+academicVisualizer.initializeEntityDict(useAliases);
+wikiVisualizer.initializeEntityDict(useAliases);
 
 // Entities
 // Whitepaper corpus glossary analysis
-let glossaryEntities = whitepaperVisualizer.getGlossaryEntitiesWithAlias();
-console.log(`Detected ${Object.keys(glossaryEntities).length} out of ${glossary.length} terms as entities on scierc whitepaper corpus (${(Object.keys(glossaryEntities).length / glossary.length).toFixed(2) * 100}%)`)
+let glossaryEntities = whitepaperVisualizer.getGlossaryEntities();
+console.log(`Detected ${Object.keys(glossaryEntities).length} out of ${glossary.length} terms as entities on ${model} whitepaper corpus (${(Object.keys(glossaryEntities).length / glossary.length).toFixed(2) * 100}%)`)
 
-let glossaryEntitiesLightweight = whitepaperVisualizerLightweight.getGlossaryEntitiesWithAlias();
-console.log(`Detected ${Object.keys(glossaryEntitiesLightweight).length} out of ${glossary.length} terms as entities on scierc_lightweight whitepaper corpus (${(Object.keys(glossaryEntitiesLightweight).length / glossary.length).toFixed(2) * 100}%)`)
+let missingTerms = [];
+glossary.forEach(word => {
+  if(!whitepaperVisualizer.entityDict[word]) {
+    missingTerms.push(word)
+  }
+})
+
+console.log(`Missing glossary terms for whitepaper corpus:`);
+missingTerms.forEach(word => {
+  console.log(word)
+})
 
 // Academic corpus glossary analysis
-glossaryEntities = academicVisualizer.getGlossaryEntitiesWithAlias();
-console.log(`Detected ${Object.keys(glossaryEntities).length} out of ${glossary.length} terms as entities on scierc academic corpus (${(Object.keys(glossaryEntities).length / glossary.length).toFixed(2) * 100}%)`)
+glossaryEntities = academicVisualizer.getGlossaryEntities();
+console.log(`Detected ${Object.keys(glossaryEntities).length} out of ${glossary.length} terms as entities on ${model} academic corpus (${(Object.keys(glossaryEntities).length / glossary.length).toFixed(2) * 100}%)`)
 
-glossaryEntitiesLightweight = academicVisualizerLightweight.getGlossaryEntitiesWithAlias();
-console.log(`Detected ${Object.keys(glossaryEntitiesLightweight).length} out of ${glossary.length} terms as entities on scierc_lightweight academic corpus (${(Object.keys(glossaryEntitiesLightweight).length / glossary.length).toFixed(2) * 100}%)`)
+missingTerms = [];
+glossary.forEach(word => {
+  if(!academicVisualizer.entityDict[word]) {
+    missingTerms.push(word)
+  }
+})
+
+console.log(`Missing glossary terms for academic corpus:`);
+missingTerms.forEach(word => {
+  console.log(word)
+})
 
 // Wiki corpus glossary analysis
-glossaryEntities = wikiVisualizer.getGlossaryEntitiesWithAlias();
-console.log(`Detected ${Object.keys(glossaryEntities).length} out of ${glossary.length} terms as entities on scierc wiki corpus (${(Object.keys(glossaryEntities).length / glossary.length).toFixed(2) * 100}%)`)
+glossaryEntities = wikiVisualizer.getGlossaryEntities();
+console.log(`Detected ${Object.keys(glossaryEntities).length} out of ${glossary.length} terms as entities on ${model} wiki corpus (${(Object.keys(glossaryEntities).length / glossary.length).toFixed(2) * 100}%)`)
 
-glossaryEntitiesLightweight = wikiVisualizerLightweight.getGlossaryEntitiesWithAlias();
-console.log(`Detected ${Object.keys(glossaryEntitiesLightweight).length} out of ${glossary.length} terms as entities on scierc_lightweight wiki corpus (${(Object.keys(glossaryEntitiesLightweight).length / glossary.length).toFixed(2) * 100}%)`)
+missingTerms = [];
+glossary.forEach(word => {
+  if(!wikiVisualizer.entityDict[word]) {
+    missingTerms.push(word)
+  }
+})
+
+console.log(`Missing glossary terms for wiki corpus:`);
+missingTerms.forEach(word => {
+  console.log(word)
+})
 
 // Relations
+let whitepaperRelationCount = 0;
+let academicRelationCount = 0;
+let wikiRelationCount = 0;
+
 glossary.forEach(word => {
-  if (
-    !whitepaperVisualizer.entityDict[word] ||
-    !whitepaperVisualizerLightweight.entityDict[word]
-  ) {
-    return;
+  if (whitepaperVisualizer.entityDict[word]) {
+    whitepaperRelationCount += whitepaperVisualizer.entityDict[word].relations.length;
   }
 
-  console.log(`Detected ${whitepaperVisualizer.entityDict[word].relations.length} relations for ${word} on scierc whitepaper corpus`);
-  console.log(`Detected ${whitepaperVisualizerLightweight.entityDict[word].relations.length} relations for ${word} on scierc_lightweight whitepaper corpus`);
-  
-  if (
-    !academicVisualizer.entityDict[word] ||
-    !academicVisualizerLightweight.entityDict[word]
-  ) {
-    return;
+  if (academicVisualizer.entityDict[word]) {
+    academicRelationCount += academicVisualizer.entityDict[word].relations.length;
   }
 
-  console.log(`Detected ${academicVisualizer.entityDict[word].relations.length} relations for ${word} on scierc academic corpus`);
-  console.log(`Detected ${academicVisualizerLightweight.entityDict[word].relations.length} relations for ${word} on scierc_lightweight academic corpus`);
-
-  if (
-    !wikiVisualizer.entityDict[word] ||
-    !wikiVisualizerLightweight.entityDict[word]
-  ) {
-    return;
+  if (wikiVisualizer.entityDict[word]) {
+    wikiRelationCount += wikiVisualizer.entityDict[word].relations.length;
   }
-
-  console.log(`Detected ${wikiVisualizer.entityDict[word].relations.length} relations for ${word} on scierc wiki corpus`);
-  console.log(`Detected ${wikiVisualizerLightweight.entityDict[word].relations.length} relations for ${word} on scierc_lightweight wiki corpus`);
 })
+
+console.log(`Detected ${whitepaperRelationCount} relations for glossary terms on whitepaper corpus`);
+console.log(`Detected ${academicRelationCount} relations for glossary terms on academic corpus`);
+console.log(`Detected ${wikiRelationCount} relations for glossary terms on wiki corpus`);
+
+console.log(`Detected ${whitepaperRelationCount + academicRelationCount + wikiRelationCount} relations for glossary terms`);

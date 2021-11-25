@@ -7,6 +7,8 @@ export default class Visualizer {
   constructor(filePath) {
     this.entityDict = {};
     this.lines = fs.readFileSync(filePath).toString().split('\n');
+    this.nodes = [];
+    this.edges = [];
   }
 
   // PRIVATE METHODS
@@ -14,6 +16,7 @@ export default class Visualizer {
   // Initialize entity inside entity dictionary
   #initializeEntity(word, entity) {
     this.entityDict[word] = {
+      nodeIndex: this.nodes.length,
       relations: [],
       sentences: []
     }
@@ -126,6 +129,11 @@ export default class Visualizer {
           // word not found in entityDict, initialize it
           if (!this.entityDict[word]) {
             this.#initializeEntity(word, entity);
+            this.nodes.push({
+              id: this.nodes.length + 1,
+              label: word,
+              title: word
+            })
           }
 
           else {
@@ -177,6 +185,13 @@ export default class Visualizer {
 
           if (this.entityDict[wordOut]) {
             this.entityDict[wordOut].relations.push(data);
+          }
+
+          if (this.entityDict[wordIn] && this.entityDict[wordOut]) {
+            this.edges.push({
+              from: this.entityDict[wordIn].nodeIndex,
+              to: this.entityDict[wordOut].nodeIndex
+            })
           }
         })
       })

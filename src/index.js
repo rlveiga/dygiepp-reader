@@ -16,4 +16,4 @@ whitepaperVisualizer.initializeEntityDict(false);
 academicVisualizer.initializeEntityDict();
 wikiVisualizer.initializeEntityDict();
 
-console.log(whitepaperVisualizer.getGlossaryEntities())
+console.log(whitepaperVisualizer.nodes, whitepaperVisualizer.edges)

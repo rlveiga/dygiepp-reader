@@ -1,4 +1,4 @@
-export function getJSON(lines, documentKey) {
+function getJSON(lines, documentKey) {
   let documentLine = lines.find((item) => {
     item = JSON.parse(item);
     return item["doc_key"] == documentKey;
@@ -13,3 +13,5 @@ export function getJSON(lines, documentKey) {
 
   return documentLine;
 }
+
+module.exports = getJSON;

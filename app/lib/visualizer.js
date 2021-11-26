@@ -1,14 +1,12 @@
-import { getJSON } from "../scripts/get-json.js";
-import fs from 'fs';
-import glossary from "./glossary.js";
-import aliases from "./aliases.js";
+const getJSON = require('./scripts/get-json.js')
+const fs = require('fs');
+const glossary = require("./glossary.js");
+const aliases = require("./aliases.js");
 
-export default class Visualizer {
+class Visualizer {
   constructor(filePath) {
     this.entityDict = {};
     this.lines = fs.readFileSync(filePath).toString().split('\n');
-    this.nodes = [];
-    this.edges = [];
   }
 
   // PRIVATE METHODS
@@ -16,7 +14,6 @@ export default class Visualizer {
   // Initialize entity inside entity dictionary
   #initializeEntity(word, entity) {
     this.entityDict[word] = {
-      nodeIndex: this.nodes.length,
       relations: [],
       sentences: []
     }
@@ -129,11 +126,6 @@ export default class Visualizer {
           // word not found in entityDict, initialize it
           if (!this.entityDict[word]) {
             this.#initializeEntity(word, entity);
-            this.nodes.push({
-              id: this.nodes.length + 1,
-              label: word,
-              title: word
-            })
           }
 
           else {
@@ -153,7 +145,7 @@ export default class Visualizer {
         })
       })
 
-      relations.forEach(r => {
+      relations.forEach((r, sentenceIndex) => {
         r.forEach(data => {
           let wordIn, wordOut;
 
@@ -180,18 +172,11 @@ export default class Visualizer {
           }
 
           if (this.entityDict[wordIn]) {
-            this.entityDict[wordIn].relations.push(data);
+            this.entityDict[wordIn].relations.push([data, sentences[sentenceIndex]]);
           }
 
           if (this.entityDict[wordOut]) {
-            this.entityDict[wordOut].relations.push(data);
-          }
-
-          if (this.entityDict[wordIn] && this.entityDict[wordOut]) {
-            this.edges.push({
-              from: this.entityDict[wordIn].nodeIndex,
-              to: this.entityDict[wordOut].nodeIndex
-            })
+            this.entityDict[wordOut].relations.push([data, sentences[sentenceIndex]]);
           }
         })
       })
@@ -276,3 +261,5 @@ export default class Visualizer {
     });
   }
 }
+
+module.exports = Visualizer;

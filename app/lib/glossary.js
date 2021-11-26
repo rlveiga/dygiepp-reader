@@ -49,4 +49,4 @@ const glossary = [
   "zk-snarks",
 ]
 
-export default glossary;
+module.exports = glossary;

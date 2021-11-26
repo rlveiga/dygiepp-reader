@@ -1,5 +1,5 @@
-import Visualizer from "../lib/visualizer.js";
-import glossary from "../lib/glossary.js";
+import Visualizer from "../visualizer.js";
+import glossary from "../glossary.js";
 
 const args = process.argv;
 const model = args[2];

@@ -30,4 +30,4 @@ const aliases = {
     "zk-snark": ["zk snark", "zk snarks"]
 }
 
-export default aliases;
+module.exports = aliases;

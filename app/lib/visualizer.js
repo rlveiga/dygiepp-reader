@@ -244,21 +244,30 @@ class Visualizer {
     console.log(count);
   }
 
+  getDocumentKeys() {
+    let list = [];
+
+    this.lines.forEach((line) => {
+      list.push(JSON.parse(line)['doc_key']);
+    });
+
+    return list;
+  }
+
   getDocumentInfo(docKey) {
+    const document = getJSON(this.lines, docKey);
+
     const entities = this.#getEntities(docKey);
     const relations = this.#getRelations(docKey);
 
-    console.log("ENTITIES:");
-    entities.forEach((e, i) => {
-      console.log(i);
-      console.log(e);
-    });
+    relations.forEach((relation, i) => {
+      relations[i] = [relation, document['sentences'][i]]
+    })
 
-    console.log("RELATIONS:");
-    relations.forEach((e, i) => {
-      console.log(i);
-      console.log(e);
-    });
+    return {
+      entities,
+      relations
+    }
   }
 }
 

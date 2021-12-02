@@ -16,4 +16,4 @@ whitepaperVisualizer.initializeEntityDict(false);
 academicVisualizer.initializeEntityDict();
 wikiVisualizer.initializeEntityDict();
 
-console.log(whitepaperVisualizer.getDocumentInfo('whitepaper_solana'))
+console.log(whitepaperVisualizer.getDocumentKeys())
